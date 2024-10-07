@@ -48,7 +48,7 @@ options.add_argument('--no-sandbox') #샌드박스 보안기능 비활성화
 options.add_argument('--disable-dev-shm-usage')
 
 # 크롬 드라이버 최신 버전 설정
-service = Service(executable_path='/home/ubuntu/chromedriver-linux64/chromedriver')
+service = Service(executable_path='/root/chromedriver-linux64/chromedriver')
 # 크롬 드라이버
 driver = webdriver.Chrome(service = service, options = options)
 
