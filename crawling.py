@@ -94,15 +94,15 @@ def crawl_and_produce():
                 saveTitleId(titleId)
                 save_last_titleId = True
 
-            message_value = json.dumps({
+            message = {
                 'title' : title,
                 'url' : url,
                 'category' : category,
                 'date' : date
-            })
+            }
 
             #메시지 전송
-            producer.produce('naver_cafe_posts', key=titleId, value=message_value, callback=acked)
+            producer.produce('naver_cafe_posts', key=titleId.encode('utf-8'), value=json.dumps(message).encode('utf-8'), callback=acked)
 
             if idx % 500 == 0:
                 producer.poll()
