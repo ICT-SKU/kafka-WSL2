@@ -1,0 +1,20 @@
+{
+  "name": "jdbc-sink-connector-mysql",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "connection.url": "jdbc:mysql://localhost:3306/realtime_kafka",
+    "connection.user": "kafka-user",
+    "connection.password": "Kafka@1234",
+    "tasks.max": "1",
+    "topics": "naver_cafe_posts",
+    "insert.mode": "upsert",
+    "auto.create": "true",
+    "auto.evolve": "true",
+    "delete.enabled": "false",
+    "pk.mode": "record_key",
+    "pk.fields": "titleId",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false"
+  }
+}

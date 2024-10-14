@@ -1,0 +1,18 @@
+{
+    "name": "kafka-connect-sink-test",
+    "config": {
+        "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+        "connection.url": "jdbc:mysql://localhost:3306/realtime_kafka",
+        "connection.user": "kafka-user",
+        "connection.password": "Kafka@1234",
+        "auto.create": "true",
+        "auto.evolve": "false",
+        "delete.enabled": "false",
+        "tasks.max": "1",
+        "topics": "naver_cafe_post",
+        "insert.mode": "insert",
+        "transforms": "dropDate",
+        "transforms.dropDate.type": "org.apache.kafka.connect.transforms.ValueToKey",
+        "transforms.dropDate.fields": "titleId,title,url,category"
+    }
+}
