@@ -1,0 +1,30 @@
+{
+  "name": "jdbc-sink-connector-mysql",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "connection.url": "jdbc:mysql://localhost:3306/realtime_kafka?serverTimezone=UTC",
+    "connection.user": "kafka-user",
+    "connection.password": "Kafka@1234",
+    
+    "tasks.max": "1",
+    "topics": "naver_cafe_posts",
+    "insert.mode": "upsert",
+    "auto.create": "false",
+    "auto.evolve": "false",
+    "delete.enabled": "true",
+    
+    "pk.mode": "record_key",
+    "pk.fields": "titleId",
+    "table.name.format": "cafe_post",
+    
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "true",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    
+    "transforms": "TimestampConverter",
+    "transforms.TimestampConverter.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+    "transforms.TimestampConverter.field": "date",
+    "transforms.TimestampConverter.format": "yyyy-MM-dd HH:mm:ss",
+    "transforms.TimestampConverter.target.type": "string"
+  }
+}
