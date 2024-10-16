@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup as bs
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from confluent_kafka import Producer
+from datetime import datetime
 import socket
 import time
 import re
@@ -38,9 +39,7 @@ def loadTitleId():
         with open(LAST_TITLE_ID, "r") as i:
             print("마지막 게시글 ID 불러오기 완료")
             return i.read().strip()
-
     return None
-
 
 # 크롬 드라이버 기본 설정
 options = webdriver.ChromeOptions()
@@ -74,16 +73,16 @@ def crawl_and_produce():
             title = data.find(class_="article") # 제목과 url이 포함된 article 자체를 가져옴
             url = baseurl + title.get('href') # url
             title = ' '.join(title.get_text().split()) #bs4의 .strip()을 안쓴 이유 : 게시글 몇개는 특수 문자로 도배되어 있는데 strip 메소드는 해당 특수문자를 인식하지 못하여 공백을 제대로 제거하지 못함.
-            print(f'\ntitle : {title}\nurl : {url}')
 
             category = data.find(class_= 'link_name').get_text().strip()
             date = data.find(class_= 'td_date').get_text().strip()
-            print(f'category 이름 : {category}\ndate : {date}')
+            current_date = datetime.now().strftime('%Y-%m-%d')
+            formatted_date = f"{current_date} {date}:00"
 
             # 저장된 url 에서 articleid만 추출
             match = re.search(r'articleid=(\d+)', url)
             titleId = match.group(1) if match else None
-            print(f'게시글 고유 id : {titleId}\n')
+            print(f'titleId : {titleId}, category : {category}, date : {formatted_date}, url:{url}')
 
             if last_titleId and int(titleId) <= int(last_titleId):
                 print(f"이전에 크롤링 된 게시물 {last_titleId}에 도달하였습니다.")
@@ -95,11 +94,26 @@ def crawl_and_produce():
                 save_last_titleId = True
 
             message = {
-                'title' : title,
-                'url' : url,
-                'category' : category,
-                'date' : date
-            }
+                    "schema": {
+                        "type": "struct",
+                        "fields": [
+                            {"type": "int32", "optional": False, "field": "titleId"},
+                            {"type": "string", "optional": False, "field": "title"},
+                            {"type": "string", "optional": False, "field": "url"},
+                            {"type": "string", "optional": False, "field": "category"},
+                            {"type": "string", "optional": False, "field": "date"}
+                        ],
+                        "optional":False,
+                        "name":"naver_cafe_posts"
+                    },
+                    "payload": {
+                        'titleId' : int(titleId),
+                        'title' : title,
+                        'url' : url,
+                        'category' : category,
+                        'date' : formatted_date
+                        }
+                    }
 
             #메시지 전송
             producer.produce('naver_cafe_posts', key=titleId.encode('utf-8'), value=json.dumps(message).encode('utf-8'), callback=acked)
