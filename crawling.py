@@ -31,13 +31,11 @@ LAST_TITLE_ID = "./last_titleId.txt"
 def saveTitleId(titleId):
         with open(LAST_TITLE_ID, "w") as i:
             i.write(titleId)
-            print(f"마지막 게시글 ID {titleId} 저장 완료")
 
 # 마지막 게시글 id 불러오기
 def loadTitleId():
     if os.path.exists(LAST_TITLE_ID):
         with open(LAST_TITLE_ID, "r") as i:
-            print("마지막 게시글 ID 불러오기 완료")
             return i.read().strip()
     return None
 
@@ -65,7 +63,6 @@ def crawl_and_produce():
         driver.switch_to.frame('cafe_main') #iframe 전환
         soup = bs(driver.page_source, 'html.parser')
 
-        print(f"페이지 {page} 게시글 추출을 실행합니다.")
         soup = soup.find_all(class_='article-board m-tcol-c')[1]
         datas = soup.select("#main-area > div:nth-child(4) > table > tbody > tr")
 
@@ -74,22 +71,19 @@ def crawl_and_produce():
             url = baseurl + title.get('href') # url
             title = ' '.join(title.get_text().split()) #bs4의 .strip()을 안쓴 이유 : 게시글 몇개는 특수 문자로 도배되어 있는데 strip 메소드는 해당 특수문자를 인식하지 못하여 공백을 제대로 제거하지 못함.
 
-            category = data.find(class_= 'link_name').get_text().strip()
+            category = data.find(class_= 'link_name').get_text().strip() # 요소에서 text만 뽑아옴
             date = data.find(class_= 'td_date').get_text().strip()
-            current_date = datetime.now().strftime('%Y-%m-%d')
-            formatted_date = f"{current_date} {date}:00"
+            current_date = datetime.now().strftime('%Y-%m-%d') # 현재 년도와 월 일을 구해옴
+            formatted_date = f"{current_date} {date}:00" # date 수정
 
             # 저장된 url 에서 articleid만 추출
             match = re.search(r'articleid=(\d+)', url)
             titleId = match.group(1) if match else None
-            print(f'titleId : {titleId}, category : {category}, date : {formatted_date}, url:{url}')
 
             if last_titleId and int(titleId) <= int(last_titleId):
-                print(f"이전에 크롤링 된 게시물 {last_titleId}에 도달하였습니다.")
                 return
             
             if not save_last_titleId:
-                print(f"기존 {last_titleId}를 {titleId}로 최신화 합니다")
                 saveTitleId(titleId)
                 save_last_titleId = True
 
@@ -131,6 +125,6 @@ if __name__ == "__main__":
             crawl_and_produce()
             time.sleep(60)
     except KeyboardInterrupt:
-        print("작업 중단")
+        print("Stop!")
     finally:
         driver.quit()
